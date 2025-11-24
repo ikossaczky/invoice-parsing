@@ -14,7 +14,7 @@ os.environ['HADOOP_USER_NAME'] = os.getenv('USER', 'spark')
 os.environ['HADOOP_HOME'] = '/tmp/hadoop'
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, current_timestamp, input_file_name
+from pyspark.sql import functions as F
 from pyspark.sql.types import StructType, StructField, StringType, TimestampType
 
 # Configuration
@@ -43,6 +43,14 @@ def write_to_sqlite(batch_df, batch_id):
         batch_id: Unique identifier for the batch
     """
     if batch_df.count() > 0:
+        # Aggregate by file so that each file becomes exactly one row
+        aggregated_df = batch_df.groupBy("file_name").agg(
+            F.collect_list("content").alias("contents"),
+            F.min("processed_time").alias("processed_time"),
+        ).withColumn(
+            "content", F.array_join(F.col("contents"), "\n")
+        ).select("content", "file_name", "processed_time")
+
         # Convert to Pandas and write to SQLite
         import sqlite3
         
@@ -60,8 +68,8 @@ def write_to_sqlite(batch_df, batch_id):
             )
         ''')
         
-        # Convert Spark DataFrame to Pandas
-        pandas_df = batch_df.toPandas()
+        # Convert aggregated Spark DataFrame to Pandas
+        pandas_df = aggregated_df.toPandas()
         
         # Write to SQLite
         pandas_df.to_sql('text_files', conn, if_exists='append', index=False)
@@ -69,7 +77,7 @@ def write_to_sqlite(batch_df, batch_id):
         conn.commit()
         conn.close()
         
-        print(f"Batch {batch_id}: Wrote {batch_df.count()} records to database")
+        print(f"Batch {batch_id}: Wrote {aggregated_df.count()} files to database")
 
 
 def main():
@@ -102,12 +110,12 @@ def main():
     
     # Add metadata columns
     processed_df = streaming_df \
-        .withColumn("file_name", input_file_name()) \
-        .withColumn("processed_time", current_timestamp()) \
+        .withColumn("file_name", F.input_file_name()) \
+        .withColumn("processed_time", F.current_timestamp()) \
         .select(
-            col("value").alias("content"),
-            col("file_name"),
-            col("processed_time")
+            F.col("value").alias("content"),
+            F.col("file_name"),
+            F.col("processed_time")
         )
     
     # Write stream to SQLite using foreachBatch
