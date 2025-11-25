@@ -80,7 +80,7 @@ Supported formats: `.pdf`, `.jpg`, `.jpeg`, `.png`
 
 Edit constants in `scripts/invoice_streaming.py`:
 
-- `SIMILARITY_THRESHOLD`: Threshold for vectorstore matching (default: 0.95)
+- `SIMILARITY_THRESHOLD`: Threshold for vectorstore matching (default: 0.9)
 - `MONITORED_FILE_EXTENSIONS`: File types to process (default: pdf, jpg, jpeg, png)
 - `DATA_LANDING_FOLDER`: Folder to monitor (data_landing)
 - `DATABASE_PATH`: SQLite database location

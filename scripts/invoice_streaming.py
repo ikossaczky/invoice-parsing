@@ -30,7 +30,7 @@ VECTORSTORE_DIR = "/home/igor/Git/invoice-parsing/vectorstores"
 FAISS_INDEX_PATH = os.path.join(VECTORSTORE_DIR, "invoice_vectorstore_index.bin")
 FAISS_METADATA_PATH = os.path.join(VECTORSTORE_DIR, "invoice_vectorstore_metadata.json")
 
-SIMILARITY_THRESHOLD = 0.95
+SIMILARITY_THRESHOLD = 0.9
 MONITORED_FILE_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png']
 
 # Global instances (initialized once per executor)
