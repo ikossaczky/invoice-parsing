@@ -55,6 +55,19 @@ USER=your_username
 
 ## Usage
 
+### Reset the Setup (Optional)
+
+To clear all existing data and start fresh:
+
+```bash
+bash scripts/reset_setup.sh
+```
+
+This will:
+- Delete and recreate `databases/` folder
+- Delete and recreate `vectorstores/` folder  
+- Delete and recreate `data_landing/` folder
+
 ### Start the Streaming Pipeline
 
 ```bash
@@ -99,7 +112,8 @@ invoice-parsing/
 │   ├── vectorstore_manager.py  # FAISS vectorstore operations
 │   └── database_manager.py     # SQLite database operations
 ├── scripts/
-│   └── invoice_streaming.py    # Main streaming pipeline
+│   ├── invoice_streaming.py    # Main streaming pipeline
+│   └── reset_setup.sh          # Reset script to clean all data
 ├── data_landing/               # Landing zone for invoice files
 ├── databases/                  # SQLite database storage
 │   └── invoice_database.db
