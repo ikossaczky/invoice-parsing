@@ -5,7 +5,7 @@
 This demo shows how to use Spark to process invoice data and extract relevant information from it.
 It includes the following steps:
 
-- Spark streaming monitors folder observed_data for new invoice files.
+- Spark streaming monitors folder data_landing for new invoice files.
 - New invoice files comes - following steps are done, using foreachBatch
    - Invoice text is extracted from the file using PyPDF2
    - If PyPDF2 fail, we use Tesseract to extract text from the file
@@ -20,7 +20,7 @@ It includes the following steps:
       - extract list unknown_processed_items
       - update vectorstore: add unknown item names, their embeddings and unknown_processed_items to vectorstore
 
-   - Save unknown_raw_items with corresponding unknown_processed_items as well as known_raw_items with corresponding known_processed_items to database. Provide also filename and ingestion timestamp.
+   - Save unknown_raw_items with corresponding unknown_processed_items as well as known_raw_items with corresponding known_processed_items to database. Provide also filename and ingestion timestamp and extraction_method (VECTORSTORE or LLM)
 
 ## Models used:
 - as LLM for prompting we use Openai `gpt-5-mini`
@@ -43,12 +43,13 @@ It includes the following steps:
 - name: 
    - invoice_database.db
 - We store the final invoice data in a database:
-   - file_name: str
-   - ingestion_time: timestamp
-   - processed_item_description: str
-   - raw_item_description: str
+   - FILE_NAME: str
+   - INGESTION_TIME: timestamp
+   - PROCESSED_ITEM_DESCRIPTION: str
+   - RAW_ITEM_DESCRIPTION: str
+   - EXTRACTION_METHOD: str (VECTORSTORE or LLM)
 
-- one row is one item, but given filename and ingestion_time, obviously correspinds to several rows
+- one row is one item, but given FILE_NAME and INGESTION_TIME, obviously correspinds to several rows
 
 ## Code structure
 - Make the code structure modular.

@@ -17,8 +17,8 @@ pip install -r ../requirements.txt
 
 2. **Add text files to the monitored folder:**
    ```bash
-   echo "Hello, World!" > ../observed_data/test1.txt
-   echo "Another message" > ../observed_data/test2.txt
+   echo "Hello, World!" > ../data_landing/test1.txt
+   echo "Another message" > ../data_landing/test2.txt
    ```
 
 3. **Stop the application:**
@@ -26,12 +26,12 @@ pip install -r ../requirements.txt
 
 ## How It Works
 
-- **Monitored Folder:** `/home/igor/Git/invoice-parsing/observed_data`
+- **Monitored Folder:** `/home/igor/Git/invoice-parsing/data_landing`
 - **Database:** `/home/igor/Git/invoice-parsing/databases/streaming_demo.sqlite`
-- **Checkpoint:** `/home/igor/Git/invoice-parsing/observed_data/_spark_checkpoint`
+- **Checkpoint:** `/home/igor/Git/invoice-parsing/data_landing/_spark_checkpoint`
 
 The application:
-1. Monitors the `observed_data` folder for new text files
+1. Monitors the `data_landing` folder for new text files
 2. Reads each line from the text files
 3. Stores the content along with the filename and timestamp in SQLite
 4. Processes files every 5 seconds

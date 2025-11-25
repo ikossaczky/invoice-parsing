@@ -1,5 +1,10 @@
 databases
-observed_data
+data_landing
 .env
 databases/*
 vectorstores/*
+sample_data/*
+*_checkpoint/
+__pycache__/
+*.pyc
+.DS_Store

@@ -20,9 +20,9 @@ import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
 
-OBSERVED_FOLDER = "/home/igor/Git/invoice-parsing/observed_data"
+DATA_LANDING_FOLDER = "/home/igor/Git/invoice-parsing/data_landing"
 DATABASE_PATH = "/home/igor/Git/invoice-parsing/databases/streaming_demo.sqlite"
-CHECKPOINT_PATH = "/home/igor/Git/invoice-parsing/observed_data/_spark_checkpoint"
+CHECKPOINT_PATH = "/home/igor/Git/invoice-parsing/data_landing/_spark_checkpoint"
 VECTORSTORE_DIR = "/home/igor/Git/invoice-parsing/vectorstores"
 FAISS_INDEX_PATH = os.path.join(VECTORSTORE_DIR, "faiss_demo_index.bin")
 FAISS_METADATA_PATH = os.path.join(VECTORSTORE_DIR, "faiss_demo_metadata.json")
@@ -132,7 +132,7 @@ def write_to_sqlite(batch_df, batch_id):
 def main():
     """Main streaming application"""
     # Ensure directories exist
-    os.makedirs(OBSERVED_FOLDER, exist_ok=True)
+    os.makedirs(DATA_LANDING_FOLDER, exist_ok=True)
     os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
     os.makedirs(CHECKPOINT_PATH, exist_ok=True)
     
@@ -140,7 +140,7 @@ def main():
     spark = create_spark_session()
     
     print(f"Starting Spark Streaming...")
-    print(f"Monitoring folder: {OBSERVED_FOLDER}")
+    print(f"Monitoring folder: {DATA_LANDING_FOLDER}")
     print(f"Database location: {DATABASE_PATH}")
     print(f"Checkpoint location: {CHECKPOINT_PATH}")
     print("\nWaiting for text files...")
@@ -155,7 +155,7 @@ def main():
         .format("text") \
         .option("maxFilesPerTrigger", 1) \
         .schema(schema) \
-        .load(OBSERVED_FOLDER)
+        .load(DATA_LANDING_FOLDER)
     
     # Add metadata columns
     processed_df = streaming_df \
