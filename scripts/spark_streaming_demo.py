@@ -3,24 +3,73 @@ Spark Streaming Demo - Monitor folder for text files and write to SQLite databas
 """
 import os
 import sys
+import json
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Set environment variables before importing PySpark
-# Set Hadoop username to avoid authentication issues
 os.environ['HADOOP_USER_NAME'] = os.getenv('USER', 'spark')
-# Disable Hadoop native library warnings
 os.environ['HADOOP_HOME'] = '/tmp/hadoop'
 
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import StructType, StructField, StringType, TimestampType
 
-# Configuration
+import numpy as np
+import faiss
+from sentence_transformers import SentenceTransformer
+
 OBSERVED_FOLDER = "/home/igor/Git/invoice-parsing/observed_data"
 DATABASE_PATH = "/home/igor/Git/invoice-parsing/databases/streaming_demo.sqlite"
 CHECKPOINT_PATH = "/home/igor/Git/invoice-parsing/observed_data/_spark_checkpoint"
+VECTORSTORE_DIR = "/home/igor/Git/invoice-parsing/vectorstores"
+FAISS_INDEX_PATH = os.path.join(VECTORSTORE_DIR, "faiss_demo_index.bin")
+FAISS_METADATA_PATH = os.path.join(VECTORSTORE_DIR, "faiss_demo_metadata.json")
+
+_embedding_model = None
+
+
+def get_embedding_model():
+    global _embedding_model
+    if _embedding_model is None:
+        _embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+    return _embedding_model
+
+
+def update_faiss_vectorstore(pandas_df):
+    if pandas_df.empty:
+        return
+
+    os.makedirs(VECTORSTORE_DIR, exist_ok=True)
+
+    texts = pandas_df["content"].astype(str).tolist()
+    file_names = pandas_df["file_name"].astype(str).tolist()
+
+    model = get_embedding_model()
+    embeddings = model.encode(texts, convert_to_numpy=True)
+    embeddings = embeddings.astype("float32")
+
+    if os.path.exists(FAISS_INDEX_PATH):
+        index = faiss.read_index(FAISS_INDEX_PATH)
+        if os.path.exists(FAISS_METADATA_PATH):
+            with open(FAISS_METADATA_PATH, "r", encoding="utf-8") as f:
+                metadata = json.load(f)
+        else:
+            metadata = {"files": []}
+    else:
+        dimension = embeddings.shape[1]
+        index = faiss.IndexFlatL2(dimension)
+        metadata = {"files": []}
+
+    index.add(embeddings)
+
+    for name in file_names:
+        metadata["files"].append({"file_name": name})
+
+    faiss.write_index(index, FAISS_INDEX_PATH)
+    with open(FAISS_METADATA_PATH, "w", encoding="utf-8") as f:
+        json.dump(metadata, f)
 
 
 def create_spark_session():
@@ -68,16 +117,16 @@ def write_to_sqlite(batch_df, batch_id):
             )
         ''')
         
-        # Convert aggregated Spark DataFrame to Pandas
         pandas_df = aggregated_df.toPandas()
         
-        # Write to SQLite
         pandas_df.to_sql('text_files', conn, if_exists='append', index=False)
         
         conn.commit()
         conn.close()
-        
-        print(f"Batch {batch_id}: Wrote {aggregated_df.count()} files to database")
+
+        update_faiss_vectorstore(pandas_df)
+
+        print(f"Batch {batch_id}: Wrote {aggregated_df.count()} files to database and vectorstore")
 
 
 def main():
