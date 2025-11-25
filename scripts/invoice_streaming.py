@@ -31,6 +31,7 @@ FAISS_INDEX_PATH = os.path.join(VECTORSTORE_DIR, "invoice_vectorstore_index.bin"
 FAISS_METADATA_PATH = os.path.join(VECTORSTORE_DIR, "invoice_vectorstore_metadata.json")
 
 SIMILARITY_THRESHOLD = 0.9
+SPARK_MAX_FILE_AGE = "30d"
 MONITORED_FILE_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png']
 
 # Global instances (initialized once per executor)
@@ -260,6 +261,8 @@ def main():
     streaming_df = spark.readStream \
         .format("binaryFile") \
         .option("maxFilesPerTrigger", 1) \
+        .option("fileSource.maxFileAge", SPARK_MAX_FILE_AGE) \
+        .option("fileSource.cleaner", "archive") \
         .load(DATA_LANDING_FOLDER)
     
     # Extract file path

@@ -75,6 +75,7 @@ def extract_text_from_file(file_path: str) -> tuple[str, str]:
     
     # For PDFs, try PyPDF2 first, then fall back to Tesseract
     if file_ext == '.pdf':
+        print(f"  📝 Extracting text from PDF...")
         text = extract_text_from_pdf(file_path)
         if text:
             print(f"  📝 Successfully extracted text using PyPDF2")
@@ -89,6 +90,7 @@ def extract_text_from_file(file_path: str) -> tuple[str, str]:
     
     # For images, use Tesseract directly
     elif file_ext in ['.jpg', '.jpeg', '.png']:
+        print(f"  👁️ Extracting text from image...")
         text = extract_text_from_image(file_path)
         if text:
             print(f"  👁️ Successfully extracted text using Tesseract")
