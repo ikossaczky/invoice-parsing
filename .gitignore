@@ -1,3 +1,5 @@
 databases
 observed_data
 .env
+databases/*
+vectorstores/*
