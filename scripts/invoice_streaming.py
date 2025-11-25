@@ -120,7 +120,7 @@ def process_invoice_batch(batch_df, batch_id):
         invoice_text, extraction_method = extract_text_from_file(file_path)
         
         if not invoice_text:
-            print(f"  ✗ Failed to extract text, skipping file")
+            print(f"  ❌ Failed to extract text, skipping file")
             continue
         
         # Step 2: Extract raw items using LLM
@@ -128,7 +128,7 @@ def process_invoice_batch(batch_df, batch_id):
         raw_items = llm_client.extract_raw_items(invoice_text)
         
         if not raw_items:
-            print(f"  ✗ No items found in invoice")
+            print(f"  ❌ No items found in invoice")
             continue
         
         print(f"  ✅ Found {len(raw_items)} items:")

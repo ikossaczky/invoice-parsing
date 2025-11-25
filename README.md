@@ -26,6 +26,13 @@ pip install -r requirements.txt
 sudo apt-get install tesseract-ocr
 ```
 
+**Fedora/CentOS/RHEL:**
+```bash
+sudo dnf install tesseract
+# For CentOS/RHEL:
+# sudo yum install tesseract
+```
+
 **macOS:**
 ```bash
 brew install tesseract
@@ -105,17 +112,20 @@ invoice-parsing/
 
 | Column | Type | Description |
 |--------|------|-------------|
-| id | INTEGER | Primary key (auto-increment) |
-| file_name | TEXT | Invoice filename |
-| ingestion_time | TIMESTAMP | Processing timestamp |
-| raw_item_description | TEXT | Original item text from invoice |
-| processed_item_description | TEXT | Standardized item name |
+| ID | INTEGER | Primary key (auto-increment) |
+| FILE_NAME | TEXT | Invoice filename |
+| INGESTION_TIME | TIMESTAMP | Processing timestamp |
+| RAW_ITEM_DESCRIPTION | TEXT | Original item text from invoice |
+| PROCESSED_ITEM_DESCRIPTION | TEXT | Standardized item name |
+| EXTRACTION_METHOD | TEXT | Method used: VECTORSTORE or LLM |
 
 ## Vectorstore Structure
 
 FAISS index stores embeddings of raw item names with metadata:
 - `raw_item_name`: Original item description
 - `processed_item_name`: Standardized name
+
+**Note**: Embeddings are created from raw item names for similarity matching, while both raw and processed names are stored as metadata.
 
 ## Logging
 
