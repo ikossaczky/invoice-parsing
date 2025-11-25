@@ -26,11 +26,14 @@ pip install -r requirements.txt
 sudo apt-get install tesseract-ocr
 ```
 
-**Fedora/CentOS/RHEL:**
+**Fedora**
 ```bash
 sudo dnf install tesseract
-# For CentOS/RHEL:
-# sudo yum install tesseract
+```
+
+**CentOS/RHEL:**
+```bash
+sudo yum install tesseract
 ```
 
 **macOS:**
