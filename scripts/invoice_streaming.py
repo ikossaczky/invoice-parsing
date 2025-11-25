@@ -146,7 +146,7 @@ def process_invoice_batch(batch_df, batch_id):
         
         # Step 4: Search vectorstore for similar items
         print(f"  🧩 Searching vectorstore (threshold: {SIMILARITY_THRESHOLD})...")
-        known_items, unknown_indices = vectorstore_manager.search_similar_items(
+        indices_and_similar_items, indices_without_similar_items = vectorstore_manager.search_similar_items(
             embeddings, 
             SIMILARITY_THRESHOLD
         )
@@ -158,14 +158,14 @@ def process_invoice_batch(batch_df, batch_id):
         unknown_embeddings = []
         
         for i, raw_item in enumerate(raw_items):
-            if i in unknown_indices:
+            if i in indices_without_similar_items:
                 unknown_raw_items.append(raw_item)
                 unknown_embeddings.append(embeddings[i])
         
         # Extract known items
-        for known_item in known_items:
-            known_raw_items.append(known_item['raw_item_name'])
-            known_processed_items.append(known_item['processed_item_name'])
+        for similar_item_and_index in indices_and_similar_items:
+            known_raw_items.append(raw_items[similar_item_and_index['index']])
+            known_processed_items.append(similar_item_and_index['similar_processed_item_name'])
         
         print(f"  🧩 Found {len(known_raw_items)} known items in vectorstore:")
         for raw, processed in zip(known_raw_items, known_processed_items):

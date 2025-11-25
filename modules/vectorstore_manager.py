@@ -60,9 +60,9 @@ class VectorstoreManager:
             threshold: Similarity threshold (0-1), items with similarity > threshold are considered known
             
         Returns:
-            Tuple of (known_items, unknown_indices)
-            - known_items: List of dicts with raw_item_name and processed_item_name
-            - unknown_indices: Indices of items that are unknown (below threshold)
+            Tuple of (indices_and_similar_items, indices_without_similar_items)
+            - indices_and_similar_items: List of dicts with raw_item_name and processed_item_name
+            - indices_without_similar_items: Indices of items that are unknown (below threshold)
         """
         if self.index is None or self.index.ntotal == 0:
             # No items in vectorstore, all items are unknown
@@ -77,8 +77,8 @@ class VectorstoreManager:
         k = 1  # Get the single most similar item
         distances, indices = self.index.search(query_vectors, k)
         
-        known_items = []
-        unknown_indices = []
+        indices_and_similar_items = []
+        indices_without_similar_items = []
         
         for i, (distance, idx) in enumerate(zip(distances, indices)):
             # Convert L2 distance to cosine similarity approximation
@@ -91,15 +91,16 @@ class VectorstoreManager:
             if similarity >= threshold and idx[0] >= 0:
                 # Item is known
                 metadata_item = self.metadata["items"][idx[0]]
-                known_items.append({
-                    "raw_item_name": metadata_item["raw_item_name"],
-                    "processed_item_name": metadata_item["processed_item_name"]
+                indices_and_similar_items.append({
+                    "similar_raw_item_name": metadata_item["raw_item_name"],
+                    "similar_processed_item_name": metadata_item["processed_item_name"],
+                    "index": i
                 })
             else:
                 # Item is unknown
-                unknown_indices.append(i)
+                indices_without_similar_items.append(i)
         
-        return known_items, unknown_indices
+        return indices_and_similar_items, indices_without_similar_items
     
     def add_items(
         self, 
